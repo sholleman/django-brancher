@@ -9,7 +9,10 @@ class Command(DbNameMixin, BaseCommand):
     def handle(self, *args, **options):
         self.change_defaults(**options)
         with connection.cursor() as cursor:
-            cursor.execute("SELECT datname FROM pg_database WHERE datname like '{}%';".format(self.get_db_name))
+            if self.is_postgresql:
+                cursor.execute("SELECT datname FROM pg_database WHERE datname like '{}%';".format(self.get_db_name))
+            elif self.is_mysql:
+                cursor.execute("SHOW DATABASES LIKE \'{}%\';'.format(db_name)';".format(self.get_db_name))
             databases = cursor.fetchall()
             self.stdout.write("Your branched databases:")
             for datname in databases:
